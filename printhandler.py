@@ -4,10 +4,8 @@ import sys
 import getopt
 
 from printrun.printcore import printcore
+from printrun import gcoder
 from serial import SerialException
-
-port = '/dev/tty.usbmodem14101'
-baud = 250000
 
 class DefaultUSBHandler:
     def __init__(self, port = None, baud = None):
@@ -23,18 +21,25 @@ class DefaultUSBHandler:
             print("connected to printer")
         elif self.port is not None and self.baud is not None:
             self.p.connect(self.port, self.baud)
-            print("connected to printer")
+            print("connected to " + self.port)
         else:
             print("not connected to printer")
     def disconnect(self):
         self.p.disconnect()
+        print("disconnceted from " + self.port)
 
-    def send(self, t = None):
+    def send_now(self, t = None):
         if t:
             self.p.send_now(t)
         else:
             print("nothing to send")
 
+    def send(self, t = None):
+        if t:
+            self.p.startprint(gcoder.LightGCode([t]))
+        else:
+            print("nothing to send")
+
     def status(self):
-        return (self.p.online)
+        return ("online: " + str(self.p.online) + ", printing: " + str(self.p.printing))
 
