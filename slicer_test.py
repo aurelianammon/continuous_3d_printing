@@ -16,6 +16,7 @@ def create(factor):
     center = pc.point(50, 50, 0)
     radius = math.sqrt(pow(diameter, 2) + pow(diameter, 2)) / 2
     rotation = math.pi / number_of_points + math.pi / 180 * factor
+    extrusion_rate = 2
 
     points = []
     gcode = []
@@ -37,7 +38,13 @@ def create(factor):
         point_next = points[(i + 1) % (len(points))]
         x = point_next[0]
         y = point_next[1]
-        gcode.append("G1 X" + str(x) + " Y" + str(y) + " F" + str(pc.distance(point, point_next)))
+        gcode.append("G92 E0")
+        gcode.append(
+            "G1 X" + str(x) + 
+            " Y" + str(y) + 
+            " Z" + str(0.1 * factor) + 
+            " E" + str(pc.distance(point, point_next) * extrusion_rate)
+        )
         #gcode.append("G1 X" + str(x) + " Y" + str(y))
         i += 1
 
