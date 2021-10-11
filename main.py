@@ -5,7 +5,9 @@ import sys
 import getopt
 
 from printhandler import DefaultUSBHandler
-import slicer_test as shape
+#import slicer_test as shape
+import shapehandler
+import slicerhandler
 
 # gui
 import tkinter as tk
@@ -26,39 +28,51 @@ print_handler = DefaultUSBHandler(port, baud)
 
 #reset printer postition ans setting
 def printer_setup():
-    print_handler.send(["G90", "M104 S200", "G28"])
+    print_handler.send(["G90", "M104 S210", "G28"])
+    #print_handler.send(["G90", "G28"])
     while print_handler.is_printing():
         root.update()
         time.sleep(0.1)
 
 def printer_up():
-    print_handler.send(["G1 Z10"])
+    print_handler.send(["G91", "G1 Z10", "G90"])
     while print_handler.is_printing():
         time.sleep(0.1)
 
 def printer_down():
-    print_handler.send(["G91", "G1 E10", "G90"])
+    print_handler.send(["G91", "G1 Z-10", "G90"])
     while print_handler.is_printing():
         time.sleep(0.1)
 
 def printer_pause_resume():
-    print_handler.pause()
+    if print_handler.is_printing():
+        print_handler.pause()
+    elif print_handler.is_paused():
+        print_handler.resume()
+
+def printer_extrude():
+    print_handler.send(["G92 E0", "G1 E10 F800"])
+    while print_handler.is_printing():
+        time.sleep(0.1)
 
 def start_print():
-    print_handler.send(["G1 Z10", "G1 X0 Y0"])
+    print_handler.send(["G91", "G1 X0 Y0", "G1 X100 E20", "G90",])
     while print_handler.is_printing():
         time.sleep(0.1)
 
     i = 0
-    while i < 90:
-        gcode = shape.create(i)
+    while i < 180:
+        gcode = slicerhandler.create(i, shapehandler.create(0.5 * i))
         print_handler.send(gcode)
-        while print_handler.p.printing:
+        while (print_handler.is_printing() or print_handler.is_paused()):
             root.update()
-        i = i + 10
+            time.sleep(0.1)
+            print(print_handler.status())
+        print("let's goooooo!")
+        i = i + 1
 
 # disconnect from printer
-#print_handler.disconnect()
+# print_handler.disconnect()
 
 class MainGUI:
     def __init__(self, master):
@@ -85,13 +99,16 @@ class MainGUI:
         self.button_print = Button(text="Print", command=start_print)
         self.button_print.pack(fill='x')
 
+        self.button_extrude = Button(text="Extrude", command=printer_extrude)
+        self.button_extrude.pack(fill='x')
+
         self.button_pause = Button(text="Pause", command=printer_pause_resume)
         self.button_pause.pack(fill='x', side='left')
 
         # lable test
         self.label_a = tk.Label(text="Printer online:")
         self.label_a.pack(side='left')
-
+        
         self.label = tk.Label(text=str(print_handler.p.online))
         self.label.pack(side='right')
 
