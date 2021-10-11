@@ -51,18 +51,19 @@ def printer_pause_resume():
         print_handler.resume()
 
 def printer_extrude():
-    print_handler.send(["G92 E0", "G1 E10 F800"])
+    print_handler.send(["G92 E0", "G1 E2 F100"])
     while print_handler.is_printing():
         time.sleep(0.1)
 
 def start_print():
-    print_handler.send(["G91", "G1 X0 Y0", "G1 X100 E20", "G90",])
+    print_handler.send(slicerhandler.start())
     while print_handler.is_printing():
         time.sleep(0.1)
 
     i = 0
-    while i < 180:
-        gcode = slicerhandler.create(i, shapehandler.create(0.5 * i))
+    while i < 2:
+        #gcode = slicerhandler.create(i, shapehandler.create_test(0.5 * i))
+        gcode = slicerhandler.create(i, shapehandler.create_stepover(10))
         print_handler.send(gcode)
         while (print_handler.is_printing() or print_handler.is_paused()):
             root.update()
@@ -70,6 +71,8 @@ def start_print():
             print(print_handler.status())
         print("let's goooooo!")
         i = i + 1
+    
+    print_handler.send(slicerhandler.end())
 
 # disconnect from printer
 # print_handler.disconnect()
