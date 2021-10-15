@@ -29,12 +29,10 @@ def create_test(factor = 0):
     return points
 
 # stepover test shape
-def create_stepover(factor = 0):
+def create_stepover(angle = 0, stepover_parameter = 10):
     diameter = 50
-    stepover_parameter = 10
     center = pc.point(100, 100, 0)
-    radius = math.sqrt(pow(diameter, 2) + pow(diameter, 2)) / 2
-    rotation = math.pi / stepover_parameter + math.pi / 180 * factor
+
 
     points = []
 
@@ -49,7 +47,7 @@ def create_stepover(factor = 0):
     z = 0
     points.append(pc.point(round(x, 5), round(y, 5), round(z, 5)))
 
-    for i in range(stepover_parameter - 1):
+    for i in range(stepover_parameter):
         x = points[-1][0]
         y = points[-1][1] + (diameter/stepover_parameter)
         z = 0
@@ -66,4 +64,24 @@ def create_stepover(factor = 0):
             z = 0
             points.append(pc.point(round(x, 5), round(y, 5), round(z, 5)))
 
+    for i in range(len(points)):
+        points[i] = pc.rotate(points[i], center, angle)
+
     return points
+
+def toolpath(points):
+    
+    new_points = []
+
+    for i in range(len(points) - 1)
+    i = 0
+    while i < len(points) - 1:
+        point = points[i]
+        point_next = points[(i + 1) % (len(points))]
+
+
+
+        new_points.append()
+        i += 1
+    
+    return new_points

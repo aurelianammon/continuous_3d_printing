@@ -60,16 +60,26 @@ def start_print():
     while print_handler.is_printing():
         time.sleep(0.1)
 
-    i = 0
-    while i < 2:
+    i = 10
+    while i < 20:
         #gcode = slicerhandler.create(i, shapehandler.create_test(0.5 * i))
-        gcode = slicerhandler.create(i, shapehandler.create_stepover(10))
-        print_handler.send(gcode)
-        while (print_handler.is_printing() or print_handler.is_paused()):
-            root.update()
-            time.sleep(0.1)
-            print(print_handler.status())
-        print("let's goooooo!")
+
+        angle = 0
+        if i%2 == 0:
+            angle = 30
+        else:
+            angle = -95
+
+        repeater = 2
+        for repeater_i in range(repeater):
+            gcode = slicerhandler.create(repeater * i + repeater_i, shapehandler.create_stepover(angle, 5 + i))
+            print_handler.send(gcode)
+            while (print_handler.is_printing() or print_handler.is_paused()):
+                root.update()
+                time.sleep(0.1)
+                #print(print_handler.status())
+            print("let's goooooo!")
+        
         i = i + 1
     
     print_handler.send(slicerhandler.end())
