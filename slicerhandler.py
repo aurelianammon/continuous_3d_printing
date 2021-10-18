@@ -24,7 +24,7 @@ def create(layer, points):
 
     i = 0
     #gcode.append("G1 Z10")
-    gcode.append("G1 Z" + str(layer * layer_hight))
+    gcode.append("G1 Z" + str(layer * layer_hight + 0.2))
     gcode.append("G1 X" + str(points[0][0]) + " Y" + str(points[0][1]))
     #gcode.append("G1 Z0")
     gcode.append("G92 E0")
@@ -53,8 +53,8 @@ def start():
     
     gcode = []
 
-    gcode.append("G91")
-    gcode.append("G1 X0 Y0")
+    gcode.append("G90")
+    gcode.append("G1 X0 Y0 Z0.2")
     gcode.append("G1 X100 E25")
     gcode.append("G90")
     gcode.append("G92 E0")

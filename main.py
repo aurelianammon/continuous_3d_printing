@@ -28,7 +28,7 @@ print_handler = DefaultUSBHandler(port, baud)
 
 #reset printer postition ans setting
 def printer_setup():
-    print_handler.send(["G90", "M104 S210", "G28"])
+    print_handler.send(["G90", "M104 S210", "G28", "G91", "G1 Z10", "G90"])
     #print_handler.send(["G90", "G28"])
     while print_handler.is_printing():
         root.update()
@@ -60,19 +60,19 @@ def start_print():
     while print_handler.is_printing():
         time.sleep(0.1)
 
-    i = 10
-    while i < 20:
+    i = 0
+    while i < 1:
         #gcode = slicerhandler.create(i, shapehandler.create_test(0.5 * i))
 
         angle = 0
         if i%2 == 0:
-            angle = 30
+            angle = 0
         else:
-            angle = -95
+            angle = -45
 
         repeater = 2
         for repeater_i in range(repeater):
-            gcode = slicerhandler.create(repeater * i + repeater_i, shapehandler.create_stepover(angle, 5 + i))
+            gcode = slicerhandler.create(repeater * i + repeater_i, shapehandler.create_stepover(angle, 3))
             print_handler.send(gcode)
             while (print_handler.is_printing() or print_handler.is_paused()):
                 root.update()
