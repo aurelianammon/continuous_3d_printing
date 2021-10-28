@@ -67,7 +67,7 @@ def create_stepover(angle = 0, stepover_parameter = 10):
     for i in range(len(points)):
         points[i] = pc.rotate(points[i], center, angle)
 
-    return toolpath(points, "SQUARE")
+    return points
     # return points
 
 def rotate(points, center, angle):

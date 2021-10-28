@@ -66,28 +66,30 @@ def start_print():
         time.sleep(0.1)
 
     angle = 0
-    next_iteration = app.layer.get() + 10
+    next_iteration = app.layer.get() + 50
     while app.layer.get() < next_iteration:
         #gcode = slicerhandler.create(i, shapehandler.create_test(0.5 * i))
 
-        wobbler = 5
+        wobbler = 15
         angle = angle + random.randint(-wobbler, wobbler)
         print("angle = " + str(angle))
-        # if i%2 == 0:
-        #     angle = 0
-        # else:
-        #     angle = -45
 
-        repeater = 2
-        for repeater_i in range(repeater):
-            gcode = slicerhandler.create(repeater * app.layer.get() + repeater_i, shapehandler.create_stepover(angle, 6))
+        # create the shape points
+        points = shapehandler.create_stepover(angle, 6)
+        points = shapehandler.toolpath(points, "SAW")
+
+        repetitions = 2
+        for i in range(repetitions):
+            # create gcode from points
+            gcode = slicerhandler.create(app.layer.get(), points)
             print_handler.send(gcode)
             while (print_handler.is_printing() or print_handler.is_paused()):
                 root.update()
                 time.sleep(0.1)
                 #print(print_handler.status())
+            # update layer hight
+            app.layer.set(app.layer.get() + 1)
         
-        app.layer.set(app.layer.get() + 1)
     
     print_handler.send(slicerhandler.end())
 
