@@ -67,10 +67,19 @@ def create_stepover(angle = 0, stepover_parameter = 10):
     for i in range(len(points)):
         points[i] = pc.rotate(points[i], center, angle)
 
-    return toolpath(points, "SINE")
+    return toolpath(points, "SQUARE")
     # return points
 
-def toolpath(points, shape = "SINE"):
+def rotate(points, center, angle):
+    for i in range(len(points)):
+        points[i] = pc.rotate(points[i], center, angle)
+
+    return points
+
+def toolpath(points, shape = "NONE"):
+
+    if (shape == "NONE"):
+        return points
 
     magnitude = 2
     wave_lenght = 8

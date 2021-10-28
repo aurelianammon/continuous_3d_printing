@@ -3,6 +3,7 @@ import threading
 import getopt
 import sys
 import getopt
+import random
 
 from printhandler import DefaultUSBHandler
 #import slicer_test as shape
@@ -28,7 +29,7 @@ print_handler = DefaultUSBHandler(port, baud)
 
 #reset printer postition ans setting
 def printer_setup():
-    print_handler.send(["G90", "M104 S210", "G28", "G91", "G1 Z10", "G90"])
+    print_handler.send(["G90", "M104 S210", "G28", "G91", "G1 Z10", "G90" ])
     #print_handler.send(["G90", "G28"])
     while print_handler.is_printing():
         root.update()
@@ -55,32 +56,38 @@ def printer_extrude():
     while print_handler.is_printing():
         time.sleep(0.1)
 
+def zero_layer():
+    app.layer.set(0)
+    print("layer set to O")
+
 def start_print():
     print_handler.send(slicerhandler.start())
     while print_handler.is_printing():
         time.sleep(0.1)
 
-    i = 0
-    while i < 1:
+    angle = 0
+    next_iteration = app.layer.get() + 10
+    while app.layer.get() < next_iteration:
         #gcode = slicerhandler.create(i, shapehandler.create_test(0.5 * i))
 
-        angle = 0
-        if i%2 == 0:
-            angle = 0
-        else:
-            angle = -45
+        wobbler = 5
+        angle = angle + random.randint(-wobbler, wobbler)
+        print("angle = " + str(angle))
+        # if i%2 == 0:
+        #     angle = 0
+        # else:
+        #     angle = -45
 
         repeater = 2
         for repeater_i in range(repeater):
-            gcode = slicerhandler.create(repeater * i + repeater_i, shapehandler.create_stepover(angle, 3))
+            gcode = slicerhandler.create(repeater * app.layer.get() + repeater_i, shapehandler.create_stepover(angle, 6))
             print_handler.send(gcode)
             while (print_handler.is_printing() or print_handler.is_paused()):
                 root.update()
                 time.sleep(0.1)
                 #print(print_handler.status())
-            print("let's goooooo!")
         
-        i = i + 1
+        app.layer.set(app.layer.get() + 1)
     
     print_handler.send(slicerhandler.end())
 
@@ -116,7 +123,18 @@ class MainGUI:
         self.button_extrude.pack(fill='x')
 
         self.button_pause = Button(text="Pause", command=printer_pause_resume)
-        self.button_pause.pack(fill='x', side='left')
+        self.button_pause.pack(fill='x')
+
+        self.button_pause = Button(text="Zeroing", command=zero_layer)
+        self.button_pause.pack(fill='x')
+
+        self.layer = tk.IntVar()
+
+        self.entry = tk.Entry(textvariable=self.layer)
+        self.entry.pack(fill='x')
+
+        # Bind the entrybox to the Return key
+        self.entry.bind("<Return>", self.click)
 
         # lable test
         self.label_a = tk.Label(text="Printer online:")
@@ -140,9 +158,12 @@ class MainGUI:
         print_handler.disconnect()
         self.master.destroy()
 
+    def click(self, event):
+        print(self.layer.get())
+
 
 root = tk.Tk()
-my_gui = MainGUI(root)
+app = MainGUI(root)
 root.mainloop()
 
 
